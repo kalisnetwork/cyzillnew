@@ -1,0 +1,9 @@
+.valid::before {
+  content: "✓";
+  color: green;
+}
+
+.invalid::before {
+  content: "✗";
+  color: red;
+}

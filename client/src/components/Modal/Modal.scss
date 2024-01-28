@@ -1,0 +1,40 @@
+.modal-container {
+	.modal-area {
+		background-color: #b21e1e;
+		box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
+		z-index: 11;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+}
+
+
+.close-button-container {
+	display: flex;
+	justify-content: flex-end;
+
+	._modal-close {
+		padding: 5px;
+		cursor: pointer;
+
+
+		&:hover {
+			background-color: rgb(233, 233, 233);
+			border-radius: 50%;
+		}
+
+		._modal-close-icon {
+			width: 23px;
+			height: 23px;
+			fill: transparent;
+			stroke: black;
+			stroke-linecap: round;
+			stroke-width: 4;
+		}
+	}
+}
+
+
+.scroll-lock {
+	overflow: hidden;
+}

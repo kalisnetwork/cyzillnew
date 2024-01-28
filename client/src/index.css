@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Default styles */
+@import url("https://fonts.googleapis.com/css2?family=Belanosima:wght@400;600;700&family=Indie+Flower&family=Open+Sans:wght@300&family=Poppins:ital,wght@0,800;1,700&display=swap");
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #88888855;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #888888;
+}
+/* 
+::selection {
+  background: #3cbbf6;
+} */
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  scroll-behavior: smooth;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.container {
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 10px;
+  padding-left: 10px;
+  width: 100%;
+}
