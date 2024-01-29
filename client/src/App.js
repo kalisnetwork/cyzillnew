@@ -22,6 +22,7 @@ import FAQ from './components/common/faq/FAQ';
 import PropertyDetails from './components/property/PropertyCard/PropertyDetails';
 import Loading from './components/common/Loading/Loading';
 import { useEffect, useState } from 'react';
+import FindAgents from './components/common/findagents/FindAgents';
 
 const libraries = ['places'];
 function App() {
@@ -54,6 +55,7 @@ function App() {
         <Route path="/reset-password" exact={true} element={<ResetPassword />} />
         <Route path="/property-details/:propertyId?" exact={true} element={<PropertyDetails />} />
         <Route path="/homes" exact={true} element={<Homes />} />
+        <Route path="/find-agents" exact={true} element={<FindAgents />} />
         <Route path="/maps" exact={true} element={<Map />} />
         <Route path="/verification" exact={true} element={<Verification />} />
         <Route path="/terms-and-conditions" exact={true} element={<TermsAndConditions />} />

@@ -1,5 +1,5 @@
 import User from '../models/UsersModel.js';
-import Listing from '../models/ListingsModel.js';
+import Listing from '../models/PropertyModel.js';
 import { errorHandler } from '../utils/error.js';
 
 // Update user

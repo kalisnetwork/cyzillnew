@@ -108,19 +108,6 @@ const Filters = ({ onSearch, onFilterChange }) => {
                     <MdMyLocation />
                 </button>
             </div>
-            <div className="filter">
-                <div className="relative inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none">
-                    <select
-                        className="appearance-none"
-                        value={filters.saleOrRent}
-                        onChange={(e) => handleSaleOrRentChange(e.target.value)}
-                    >
-                        <option value="sell">For Sale</option>
-                        <option value="rent">For Rent</option>
-                    </select>
-                    <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2" />
-                </div>
-            </div>
             <div className="relative inline-block text-left">
                 <button onClick={toggleDropdown} className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none">
                     Price

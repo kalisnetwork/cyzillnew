@@ -5,7 +5,7 @@ import cors from 'cors';
 import path from 'path';
 import userRouter from './api/routes/Users.route.js';
 import authRouter from './api/routes/Auth.route.js';
-import listingRouter from './api/routes/Listings.route.js';
+import listingRouter from './api/routes/Property.route.js';
 import saveRouter from './api/routes/Saves.route.js';
 import cookieParser from 'cookie-parser';
 
@@ -39,7 +39,7 @@ app.listen(process.env.PORT, () => {
 
 app.use('/api/user', userRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/listing', listingRouter);
+app.use('/api/property', listingRouter);
 app.use('/api/saves', saveRouter);
 
 app.get("/api", function (req, res) {

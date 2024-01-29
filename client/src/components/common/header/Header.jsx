@@ -57,27 +57,22 @@ const Header = () => {
                 </NavbarContent>
                 <NavbarContent className="hidden sm:flex gap-4" justify="center">
                     <NavbarItem>
-                        <Link color="foreground" href="#" onMouseEnter={() => toggleDropdown(0)} onClick={handleLinkClick}>
+                        <Link color="foreground" href="/homes?saleOrRent=sell" onMouseEnter={() => toggleDropdown(0)} onClick={handleLinkClick}>
                             Buy
                         </Link>
                     </NavbarItem>
                     <NavbarItem>
-                        <Link color="foreground" href="#" onMouseEnter={() => toggleDropdown(1)} onClick={handleLinkClick}>
+                        <Link color="foreground" href="/homes?saleOrRent=rent" onMouseEnter={() => toggleDropdown(1)} onClick={handleLinkClick}>
                             Rent
                         </Link>
                     </NavbarItem>
                     <NavbarItem>
-                        <Link color="foreground" href="#" onMouseEnter={() => toggleDropdown(2)} onClick={handleLinkClick}>
-                            Sell
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem>
-                        <Link color="foreground" href="#" onMouseEnter={() => toggleDropdown(3)} onClick={handleLinkClick}>
+                        <Link color="foreground" href="/property-listing" onMouseEnter={() => toggleDropdown(3)} onClick={handleLinkClick}>
                             List Your Property
                         </Link>
                     </NavbarItem>
                     <NavbarItem>
-                        <Link color="foreground" href="#" onMouseEnter={() => toggleDropdown(4)} onClick={handleLinkClick}>
+                        <Link color="foreground" href="/find-agents" onMouseEnter={() => toggleDropdown(4)} onClick={handleLinkClick}>
                             Find Agents
                         </Link>
                     </NavbarItem>

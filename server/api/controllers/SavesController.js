@@ -1,5 +1,5 @@
 import Save from '../models/SaveModel.js';
-import Listing from '../models/ListingsModel.js';
+import Listing from '../models/PropertyModel.js';
 
 export const getAllSaves = async (req, res) => {
     try {

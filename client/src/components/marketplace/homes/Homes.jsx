@@ -15,7 +15,7 @@ const Homes = () => {
     const saleOrRent = searchParams.get('saleOrRent') || 'sell';
     const [selectedProperties, setSelectedProperties] = useState([]);
     const [visibleProperties, setVisibleProperties] = useState([]);
-    const [propertyData, setPropertyData] = useState(null);
+    const [propertyData, setPropertyData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [displayCount, setDisplayCount] = useState(6);
     const [showModal, setShowModal] = useState(false);
@@ -23,7 +23,6 @@ const Homes = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [selectedProperty, setSelectedProperty] = useState(null);
-
     const [filters, setFilters] = useState({
         searchTerm: '',
         price: '',
@@ -49,15 +48,14 @@ const Homes = () => {
                 const response = await fetch(`${BASE_URL}/api/property/properties`);
                 const data = await response.json();
                 console.log('Fetched data:', data);
-                setPropertyData(data);
+                setPropertyData(data.properties);
                 setIsLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
                 setIsLoading(false);
             }
         };
-
-        if (!propertyData) {
+        if (!propertyData.length) {
             fetchData();
         }
     }, [propertyData]);
@@ -74,28 +72,29 @@ const Homes = () => {
         if (!propertyData) {
             return;
         }
+        if (Array.isArray(propertyData)) {
+            const filteredProperties = propertyData.filter(property => {
+                return (
+                    (!filters.price || (property.price >= filters.price[0] && property.price <= filters.price[1])) &&
+                    (!filters.bedrooms ||
+                        (filters.bedrooms === 'Any' ? true :
+                            filters.bedrooms === '5+' ? property.bedrooms >= 5 :
+                                property.bedrooms == filters.bedrooms)) &&
+                    (!filters.bathrooms ||
+                        (filters.bathrooms === 'Any' ? true :
+                            filters.bathrooms === '5+' ? property.bathrooms >= 5 :
+                                property.bathrooms == filters.bathrooms)) &&
+                    (!filters.propertyType || property.propertyType === filters.propertyType) &&
+                    (!filters.amenities.length || filters.amenities.every(amenity => property.amenities.includes(amenity))) &&
+                    property.location.address.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
+                    (property.forDetails === filters.saleOrRent)
+                );
+            });
 
-        const filteredProperties = propertyData.filter(property => {
-            return (
-                (!filters.price || (property.price >= filters.price[0] && property.price <= filters.price[1])) &&
-                (!filters.bedrooms ||
-                    (filters.bedrooms === 'Any' ? true :
-                        filters.bedrooms === '5+' ? property.bedrooms >= 5 :
-                            property.bedrooms == filters.bedrooms)) &&
-                (!filters.bathrooms ||
-                    (filters.bathrooms === 'Any' ? true :
-                        filters.bathrooms === '5+' ? property.bathrooms >= 5 :
-                            property.bathrooms == filters.bathrooms)) &&
-                (!filters.propertyType || property.propertyType === filters.propertyType) &&
-                (!filters.amenities.length || filters.amenities.every(amenity => property.amenities.includes(amenity))) &&
-                property.location.address.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
-                (property.forDetails === filters.saleOrRent)
-            );
-        });
+            console.log('Filtered properties:', filteredProperties);
 
-        console.log('Filtered properties:', filteredProperties);
-
-        setVisibleProperties(filteredProperties.slice(0, displayCount));
+            setVisibleProperties(filteredProperties.slice(0, displayCount));
+        }
     }, [filters, propertyData, displayCount, mapIsVisible]);
 
     const handleFilterChange = (filterName, value) => {
