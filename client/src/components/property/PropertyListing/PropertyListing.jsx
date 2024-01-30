@@ -1,124 +1,189 @@
-import React, { useEffect, useReducer } from 'react';
-import Description from './steps/Description';
-import Media from './steps/Media';
-import Location from './steps/Location';
-import Details from './steps/Details';
-import Payment from './steps/Payment';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { GoogleMap, StandaloneSearchBox } from '@react-google-maps/api';
+import LocationDetails from './LocationDetails';
+import { Input } from '@nextui-org/react';
+import { SearchIcon } from '@nextui-org/shared-icons';
 
-const initialState = {
-    step: 1,
-    formData: {
-        description: '',
-        media: [],
-        location: '',
-        detail: '',
-        payment: [],
-    },
-};
+const Location = ({ formData, saveFormData }) => {
+    const [mapPosition, setMapPosition] = useState({
+        lat: formData.location?.lat || 17.406498,
+        lng: formData.location?.lng || 78.47724389999999,
+    });
+    const [selectedPlace, setSelectedPlace] = useState(mapPosition);
+    const [center, setCenter] = useState(mapPosition);
+    const [isSaved, setIsSaved] = useState(false);
+    const [address, setAddress] = useState('');
+    const mapRef = useRef(null);
+    const inputRef = useRef(null);
+    const markerRef = useRef(null);
+    const searchBoxRef = useRef(null);
+    const [searchBox, setSearchBox] = useState(null);
 
-function reducer(state, action) {
-    switch (action.type) {
-        case 'nextStep':
-            return { ...state, step: state.step + 1 };
-        case 'previousStep':
-            return { ...state, step: state.step - 1 };
-        case 'saveFormData':
-            return { ...state, formData: { ...state.formData, ...action.data, location: { ...state.formData.location, ...action.data.location } } };
-        default:
-            return state;
-    }
-}
+    const onSearchBoxLoad = useCallback((ref) => {
+        setSearchBox(ref);
+    }, []);
 
-const steps = {
-    1: { component: Description, name: 'Description' },
-    2: { component: Media, name: 'Media' },
-    3: { component: Location, name: 'Location' },
-    4: { component: Details, name: 'Details' },
-    5: { component: Payment, name: 'Payment' },
-};
+    const onPlacesChanged = () => {
+        if (searchBox) {
+            const places = searchBox.getPlaces();
+            if (places.length === 0) return;
 
-const PropertyListing = () => {
-    const [state, dispatch] = useReducer(reducer, initialState);
-    const { step, formData } = state;
+            const place = places[0];
+            const newPosition = {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+            };
 
-    const nextStep = () => {
-        if (step < Object.keys(steps).length) {
-            dispatch({ type: 'nextStep' });
+            setSelectedPlace(newPosition);
+            setMapPosition(newPosition);
+            markerRef.current.setPosition(newPosition);
         }
     };
 
-    const previousStep = () => dispatch({ type: 'previousStep' });
-
-    const saveFormData = (data) => {
-        dispatch({ type: 'saveFormData', data });
-        console.log(formData);
-    };
 
     useEffect(() => {
-        console.log(formData);
-    }, [formData]);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const newPosition = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+                setSelectedPlace(newPosition);
+                setMapPosition(newPosition);
+                saveFormData((prevFormData) => ({
+                    ...prevFormData,
+                    location: newPosition,
+                }));
+                mapRef.current.panTo(newPosition);
+                markerRef.current.setPosition(newPosition);
+                const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${newPosition.lat},${newPosition.lng}&key=AIzaSyBzE9bz84Bdwy24I5DAjwVhgjijqgrEEdU`);
+                const data = await response.json();
+                if (data.results && data.results.length > 0) {
+                    const address = data.results[0].formatted_address;
+                    setAddress(address);
+                    saveFormData({
+                        ...formData,
+                        location: {
+                            ...formData.location,
+                            address: address,
+                        },
+                    });
+                } else {
+                    console.log(data);
+                }
+            });
 
-    const { component: StepComponent } = steps[step];
-
-    const isStepCompleted = () => {
-        switch (state.step) {
-            case 1:
-                return state.formData.description && state.formData.description.trim() !== '' &&
-                    state.formData.personalDetails && state.formData.forDetails &&
-                    state.formData.propertyType && (state.formData.propertyType !== 'flat' || state.formData.totalFlats);
-            case 2:
-                return state.formData.media && state.formData.media.length > 0;
-            case 3:
-                return state.formData.location.lat !== '' && state.formData.location.lng !== '';
-            case 4:
-                return state.formData.bedrooms && state.formData.bathrooms && state.formData.coveredArea &&
-                    state.formData.carpetArea && state.formData.constructionYear;
-            case 5:
-                return state.formData.payment && state.formData.payment.length > 0;
-            default:
-                return true;
         }
+    }, []);
+
+
+
+
+    useEffect(() => {
+        setIsSaved(false);
+    }, [selectedPlace]);
+
+    const onMapLoad = useCallback((map) => {
+        mapRef.current = map;
+        markerRef.current = new window.google.maps.Marker({
+            position: selectedPlace,
+            map: mapRef.current,
+            title: "Selected Location",
+            icon: {
+                url: 'https://img.icons8.com/color/48/000000/marker.png',
+                scaledSize: new window.google.maps.Size(30, 30),
+            },
+        });
+    }, [selectedPlace]);
+
+    const handleLatitudeChange = (e) => {
+        const newLat = parseFloat(e.target.value);
+        const newPosition = { ...mapPosition, lat: newLat };
+        setMapPosition(newPosition);
+        setSelectedPlace(newPosition);
     };
 
-    const isLastStep = step === Object.keys(steps).length;
+    const handleLongitudeChange = (e) => {
+        const newLng = parseFloat(e.target.value);
+        const newPosition = { ...mapPosition, lng: newLng };
+        setMapPosition(newPosition);
+        setSelectedPlace(newPosition);
+    };
 
     return (
-        <div className="p-10 relative">
-            <div className="steps">
-                <ol className="flex items-center w-full text-sm font-medium text-center text-gray-500">
-                    {Object.keys(steps).map((index) => {
-                        const { name: stepName } = steps[index];
-                        return (
-                            <li key={index} className={`flex md:w-full items-center ${step > index ? 'text-blue-600' : 'text-gray-500'} after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-200 after:hidden sm:after:inline-block after:mx-6 xl:after:mx-10 dark:after:border-gray-700`} >
-                                <span className={`flex items-center after:content-['/'] sm:after:hidden after:mx-2 after:text-gray-200 dark:after:text-gray-500 ${step > index ? 'text-blue-600 dark:text-blue-500' : ''}`} >
-                                    {step > index && (
-                                        <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" >
-                                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
-                                        </svg>
-                                    )}
-                                    <span className="hidden sm:inline-flex sm:ms-2">{stepName}</span>
-                                </span>
-                            </li>
-                        );
-                    })}
-                </ol>
-                <div />
+        <div className="flex flex-col items-center justify-center h-screen">
+            <h2 className="text-2xl font-semibold mb-4">Location Details</h2>
+            <input ref={searchBoxRef} type="text" placeholder="Search" />
+            <StandaloneSearchBox
+                onLoad={onSearchBoxLoad}
+                onPlacesChanged={onPlacesChanged}
+                ref={searchBoxRef}
+            >
+                <input
+                    type="text"
+                    placeholder="Search for a location"
+                    className="w-full p-2 mb-4 border border-gray-300 rounded-md "
+                />
+            </StandaloneSearchBox>
+            <div className="w-full h-1/2 mb-4">
+                <GoogleMap
+                    zoom={10}
+                    center={center}
+                    onLoad={onMapLoad}
+                    onClick={async (e) => {
+                        const newPosition = {
+                            lat: e.latLng.lat(),
+                            lng: e.latLng.lng(),
+                        };
+                        setSelectedPlace(newPosition);
+                        setMapPosition(newPosition);
+                        markerRef.current.setPosition(newPosition);
+
+                        const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${newPosition.lat},${newPosition.lng}&key=AIzaSyBzE9bz84Bdwy24I5DAjwVhgjijqgrEEdU`);
+                        const data = await response.json();
+
+                        if (data.results && data.results.length > 0) {
+                            const addressComponents = data.results[0].address_components;
+                            const postalCodeComponent = addressComponents.find(component => component.types.includes('postal_code'));
+                            const stateComponent = addressComponents.find(component => component.types.includes('administrative_area_level_1'));
+                            const cityComponent = addressComponents.find(component => component.types.includes('locality'));
+                            const mandalComponent = addressComponents.find(component => component.types.includes('administrative_area_level_2'));
+                            const areaNameComponent = addressComponents.find(component => component.types.includes('sublocality_level_1'));
+
+                            const postalCode = postalCodeComponent ? postalCodeComponent.long_name : '';
+                            const state = stateComponent ? stateComponent.long_name : '';
+                            const city = cityComponent ? cityComponent.long_name : '';
+                            const mandal = mandalComponent ? mandalComponent.long_name : '';
+                            const areaName = areaNameComponent ? areaNameComponent.long_name : '';
+
+                            const newFormData = {
+                                ...formData,
+                                location: {
+                                    ...formData.location,
+                                    lat: newPosition.lat,
+                                    lng: newPosition.lng,
+                                    address: address,
+                                    postalCode: postalCode,
+                                    state: state,
+                                    city: city,
+                                    mandal: mandal,
+                                    areaName: areaName,
+                                },
+                            };
+                            saveFormData(newFormData);
+                            console.log(newFormData);
+                        } else {
+                            console.log(data);
+                        }
+                    }}
+
+                    mapContainerStyle={{ height: '100%', width: '100%' }}
+                    options={{ scrollwheel: true, fullscreenControl: false, mapTypeControl: true, disableDefaultUI: true, clickableIcons: false }}
+                />
             </div>
-            <StepComponent formData={formData} setFormData={saveFormData} saveFormData={saveFormData} />
-            <div className="flex justify-between">
-                {step !== 1 && (
-                    <button onClick={previousStep} className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md cursor-pointer">
-                        Previous
-                    </button>
-                )}
-                {!isLastStep && (
-                    <button onClick={nextStep} className={`bg-blue-500 text-white px-4 py-2 rounded-md ${isStepCompleted() ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
-                        Next
-                    </button>
-                )}
-            </div>
+            <LocationDetails selectedPlace={selectedPlace} handleLatitudeChange={handleLatitudeChange} handleLongitudeChange={handleLongitudeChange} address={address} />
         </div>
     );
 };
 
-export default PropertyListing;
+export default Location;
