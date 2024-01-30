@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { AiOutlineClose } from 'react-icons/ai';
-import { Pannellum } from 'pannellum-react';
 import { app } from '../../../../firebase.js';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { useSelector } from 'react-redux';
@@ -19,14 +18,13 @@ const Media = ({ formData, saveFormData }) => {
 
     const onDrop = useCallback(async (acceptedFiles) => {
         const storage = getStorage(app);
+
         const filePromises = acceptedFiles.map(async (file) => {
             let folder = '';
             if (file.type.startsWith('image/')) {
                 folder = 'images';
             } else if (file.type.startsWith('video/')) {
                 folder = 'videos';
-            } else if (file.name.endsWith('.webm')) {
-                folder = 'panoramas';
             }
             const filePath = `users/${username}/media/${folder}/${file.name}`;
             const storageRef = ref(storage, filePath);
@@ -83,21 +81,6 @@ const Media = ({ formData, saveFormData }) => {
                             <AiOutlineClose className="absolute top-0 right-0 m-1 cursor-pointer text-white bg-red-600 " onClick={() => removeFile(index)} />
                         </div>
                     ))}
-                    {media.filter(file => file.type === 'panoramas').map((file, index) => (
-                        <div key={index} className="mb-2 relative">
-                            <Pannellum
-                                width="100%"
-                                height="500px"
-                                image={file.url}
-                                pitch={10}
-                                yaw={180}
-                                hfov={110}
-                                autoLoad
-                                showZoomCtrl={false}
-                            />
-                            <AiOutlineClose className="absolute top-0 right-0 m-1 cursor-pointer text-white bg-red-600 " onClick={() => removeFile(index)} />
-                        </div>
-                    ))}
                 </div>
             </div>
         </div>
@@ -106,4 +89,3 @@ const Media = ({ formData, saveFormData }) => {
 };
 
 export default Media;
-

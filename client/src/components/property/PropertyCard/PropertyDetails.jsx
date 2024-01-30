@@ -45,7 +45,7 @@ const PropertyDetails = ({ onClose }) => {
     return (
         <ModalProvider>
             {property ? (
-                <div className="h-full bg-white p-4">
+                <div className="h-full bg-white p-4 flex flex-col justify-center items-center">
                     <div className="flex justify-between items-center">
                         <h1 className="text-3xl font-bold mb-4">Property Details</h1>
                     </div>
